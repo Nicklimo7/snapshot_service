@@ -1,0 +1,34 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.venv/
+
+# Local data/logs
+data/
+*.parquet
+*.arrow
+*.log
+
+# Parquet / Arrow files anywhere
+*.parquet
+*.arrow
+
+# Logs
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# env & secrets
+.env
+*.env
+.env.*
+.python-version

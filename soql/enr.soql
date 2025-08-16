@@ -1,0 +1,31 @@
+SELECT
+  Id,
+  Name,
+  Original_Created_Date__c,
+  Submission_Date__c,
+  Effective_Date__c,
+  Enrollment_Status__c,
+  Terminated_Date__c,
+
+  Account__c,
+  Account__r.Id,
+  Account__r.Name,
+  Account__r.Account_Stage__c,
+  Account__r.State__c,
+  Account__r.Date_Terminated__c,
+  Account__r.Churned_Date__c,
+  Account__r.Dropped_Date__c,
+  Account__r.Last_Credentialing_Initial_Approval_Date__c,
+  Account__r.Primary_License__c,
+  Account__r.Active_Application__c,
+  Account__r.Active_Application__r.Payer_Exclusions_Multi__c,
+
+  Owner.Id,
+  Owner.Name,
+
+  Payer_Network__c,
+  Payer_Network__r.Id,
+  Payer_Network__r.Name,
+  Payer_Network__r.Owner.Id,
+  Payer_Network__r.Owner.Name
+FROM Provider_Enrollment__c
