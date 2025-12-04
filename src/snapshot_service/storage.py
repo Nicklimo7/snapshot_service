@@ -23,6 +23,16 @@ def _local_path_from_uri(uri: str) -> Path:
     return Path(uri).resolve()
 
 
+def _last_segment_from_uri(uri: str) -> str:
+    """Return the final path segment (date folder name)."""
+    if _is_s3(uri):
+        # s3 always uses POSIX separators
+        path = uri[5:].rstrip("/")
+        return path.split("/")[-1]
+    # Local path: use pathlib so backslashes are handled
+    return Path(_local_path_from_uri(uri)).name
+
+
 # --- Paths & conventions -----------------------------------------------------
 
 
@@ -40,7 +50,7 @@ def snapshot_uri(base_uri: str, dataset: str, d: date) -> str:
     Daily partition folder for a dataset.
     e.g. .../enrollments/2025/08/10
     """
-    return _join_uri(snapshot_root(base_uri, dataset), f"{d:%Y}", f"{d:%m}", f"{d:%d}")
+    return _join_uri(snapshot_root(base_uri, dataset), d.isoformat())
 
 
 def object_uri(folder_uri: str, name: str) -> str:
@@ -94,12 +104,17 @@ def write_text(folder_uri: str, name: str, content: str) -> None:
 
 
 def write_parquet_atomic(
-    df: pd.DataFrame, folder_uri: str, filename: str = "data.parquet"
+    df: pd.DataFrame, folder_uri: str, filename: str | None = None
 ) -> None:
     """
     Write parquet via a temp object, then move to final name.
     Readers look only for the final name + __SUCCESS marker.
     """
+    # default to <date>.parquet based on the folder name
+    if filename is None:
+        date_str = _last_segment_from_uri(folder_uri)
+        filename = f"{date_str}.parquet"
+
     if _is_s3(folder_uri):
         import boto3
 
@@ -133,13 +148,11 @@ def write_parquet_atomic(
 # --- Reads (handy when testing) ----------------------------------------------
 
 
-def read_parquet(folder_uri: str, filename: str = "data.parquet") -> pd.DataFrame:
-    """
-    Convenience for local dev/tests. Readers in other projects can copy this if needed.
-    """
+def read_parquet(folder_uri: str, filename: str | None = None) -> pd.DataFrame:
+    if filename is None:
+        filename = f"{_last_segment_from_uri(folder_uri)}.parquet"
     obj = object_uri(folder_uri, filename)
     if _is_s3(obj):
-        # pandas + s3fs can read s3:// URIs directly
         return pd.read_parquet(obj)
     else:
         return pd.read_parquet(_local_path_from_uri(obj))

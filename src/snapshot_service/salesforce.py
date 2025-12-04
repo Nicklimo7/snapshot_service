@@ -6,20 +6,20 @@ import pandas as pd
 from org_utils.sf_env import client_from_env
 
 
-def load_enrollments_df(
-    soql_path: str = "soql/enr.soql", limit_preview: Optional[int] = None
+def load_salesforce_df(
+    soql_path: str, limit_preview: Optional[int] = None
 ) -> tuple[pd.DataFrame, str]:
-    """Uses the SF bulk API to pull soql and return a df and soql_sha
+    """Uses Salesforce bulk API to pull data and return a df and soql_sha
 
     Args:
-        soql_path (str, optional): _description_. Defaults to "soql/enr.soql".
-        limit_preview (Optional[int], optional): Include to limit results. Defaults to None.
+        soql_path (str): Path to the SOQL file
+        limit_preview (Optional[int], optional): Limit the number of rows returned. Defaults to None.
 
     Returns:
-        tuple[pd.DataFrame, str]: soql as a df, soql_sha
+        tuple[pd.DataFrame, str]: DataFrame containing the query results and the SOQL SHA
     """
 
-    # Find the soql file for the query
+    # Get the soql file for the query
     path = Path(soql_path)
     if not path.exists():
         raise FileNotFoundError(f"SOQL file not found: {path.resolve()}")

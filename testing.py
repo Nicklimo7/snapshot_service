@@ -1,7 +1,3 @@
-from datetime import date
-
-import pandas as pd
-
 from interactive_set_up import set_up_for_interactive
 
 set_up_for_interactive()
@@ -13,23 +9,13 @@ from snapshot_service.storage import (  # noqa
     write_text,
 )
 
-base_uri = "file://./data/snapshots"  # or your S3 base like "s3://my-bucket/snapshots"
+from snapshot_service.reader import latest_snapshot  # noqa
+from snapshot_service.field_formatters import format_fields  # noqa
+
 dataset = "enrollments"
-today = date.today()
 
-# 1) Make where-to-put-it
-folder = snapshot_uri(base_uri, dataset, today)
+enr_df = latest_snapshot(dataset)
 
-# 2) Make a tiny DataFrame
-df = pd.DataFrame({"hello": [1, 2, 3]})
+enr_df = format_fields(dataset, enr_df)
 
-# 3) Write the parquet safely
-write_parquet_atomic(df, folder)  # writes data.parquet
-
-# 4) Add a small manifest + success flag
-write_text(folder, "manifest.json", '{"rows": 3}')
-write_text(folder, "__SUCCESS", "")
-
-# 5) Read it back (sanity)
-df2 = read_parquet(folder)
-print(df2)
+print(enr_df.info())

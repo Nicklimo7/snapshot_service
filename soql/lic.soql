@@ -1,0 +1,12 @@
+SELECT
+    Id,
+    Name,
+    License_Number__c,
+    Effective_Expiration_Date__c,
+    Issue_Date__c,
+    CVO_Provider_Data__r.Account__r.NPI__pc,
+    CVO_Provider_Data__r.Account__r.Name,
+    CVO_Provider_Data__r.Account__r.Account_Status__pc, 
+    CVO_Provider_Data__r.Account__r.Credentialing_Stage__pc
+FROM Licenses__c
+WHERE Primary__c = true AND In_Last_Extract__c = true AND CVO_Provider_Data__r.Account__r.Credentialing_Stage__pc = 'Approved'

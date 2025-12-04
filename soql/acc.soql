@@ -1,0 +1,11 @@
+SELECT
+    Id,
+    NPI__pc,
+    Primary_Practice_State__pc,
+    Account_Status__pc,
+    Credentialing_Stage__pc,
+    CVO_Credentialing_Listener_Status__pc,
+    EPD_Provider_Facts_Record__pr.Payer_Exclusions__c
+FROM Account
+WHERE
+    NPI__pc != NULL

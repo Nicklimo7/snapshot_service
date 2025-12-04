@@ -4,44 +4,76 @@ import json
 import socket
 from datetime import date, datetime, timezone
 
-from .enrollments import load_enrollments_df
+from dotenv import load_dotenv
+
+from .airtable import load_airtable_snapshot
+from .salesforce import load_salesforce_df
 from .storage import snapshot_uri, write_parquet_atomic, write_text
 
-
-def run_for_day(d: date):
-    # 1) pull data
-    print("pulling data...")
-    df, soql_sha = load_enrollments_df()
-
-    if df.empty:
-        raise RuntimeError("Dataframe is empty; aborting.")
-
-    print(f"successfully pulled {len(df)} rows")
-
-    # 2) Destination
-    base_uri = "file://./data/snapshots"
-    dataset = "enrollments"  # to be replaced
-    destination = snapshot_uri(base_uri, dataset, d)
-
-    # 3) Write parquet atomically
-    write_parquet_atomic(df, destination)
-    print(f"successfully wrote parquet to {destination}")
-
-    # 4) Manifest + success marker
-    manifest = {
-        "dataset": dataset,
-        "rows": int(len(df)),
-        "columns": list(df.columns),
-        "produced_for": d.isoformat(),
-        "produced_at": datetime.now(timezone.utc).isoformat(),
-        "host": socket.gethostname(),
-        "soql_sha": soql_sha,
-        "base_uri": base_uri,
-        "version": "0.1.0",
-    }
-    write_text(destination, "manifest.json", json.dumps(manifest, indent=2))
-    write_text(destination, "__SUCCESS", "")
+load_dotenv()  # will look for a .env file in your project root
 
 
+BASE_URI = "file://./data/snapshots"
+
+
+def load_enrollments_df():
+    return load_salesforce_df("soql/enr.soql")
+
+
+def load_accounts_df():
+    return load_salesforce_df("soql/acc.soql")
+
+
+def load_license_df():
+    return load_salesforce_df("soql/lic.soql")
+
+
+database_dicts = {
+    "enrollments": load_enrollments_df,
+    "licenses": load_license_df,
+    "airtable": load_airtable_snapshot,
+    "accounts": load_accounts_df,
+}
+
+
+# Loop through each database and run the snapshot for today
 def main():
-    run_for_day(date.today())
+    DATE_TODAY = date.today()
+    # get each dataset
+    for dataset, load_df in database_dicts.items():
+        print(f"===== {dataset} =====")
+        try:
+            print(f"Loading {dataset} dataset...")
+            df, soql_sha = load_df()
+
+            if df.empty:
+                raise RuntimeError("Dataframe is empty; aborting.")
+
+            print(f"successfully pulled {len(df)} rows from {dataset}")
+
+            destination = snapshot_uri(BASE_URI, dataset, DATE_TODAY)
+
+            # Write parquet atomically
+            write_parquet_atomic(df, destination)
+            print(f"successfully wrote parquet to {destination}")
+
+            # 4) Manifest + success marker
+            manifest = {
+                "dataset": dataset,
+                "rows": int(len(df)),
+                "columns": list(df.columns),
+                "produced_for": DATE_TODAY.isoformat(),
+                "produced_at": datetime.now(timezone.utc).isoformat(),
+                "host": socket.gethostname(),
+                "soql_sha": soql_sha,
+                "base_uri": BASE_URI,
+                "version": "0.1.0",
+            }
+            write_text(destination, "manifest.json", json.dumps(manifest, indent=2))
+            write_text(destination, "__SUCCESS", "")
+        except Exception as e:
+            print(f"Error processing {dataset}: {e}")
+
+
+if __name__ == "__main__":
+    main()

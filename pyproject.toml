@@ -14,8 +14,11 @@ dependencies = [
   "jupyter>=1.1.1",
   "org-utils",
   "pandas>=2.3.1",
+  "pyairtable>=3.1.1",
   "pyarrow>=21.0.0",
   "python-dotenv>=1.1.1",
+  "s3fs>=0.4.2",
+  "tqdm>=4.67.1",
 ]
 
 [project.scripts]
