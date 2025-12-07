@@ -28,11 +28,16 @@ def load_license_df():
     return load_salesforce_df("soql/lic.soql")
 
 
+def load_cred_hx_df():
+    return load_salesforce_df("soql/cred_hx.soql")
+
+
 database_dicts = {
     "enrollments": load_enrollments_df,
     "licenses": load_license_df,
     "airtable": load_airtable_snapshot,
     "accounts": load_accounts_df,
+    "credentialing_history": load_cred_hx_df,
 }
 
 

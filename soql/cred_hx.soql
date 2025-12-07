@@ -1,0 +1,11 @@
+SELECT
+    Id,
+    AccountId,
+    CreatedDate,
+    Field,
+    OldValue,
+    NewValue
+FROM
+    AccountHistory
+WHERE
+    Field = 'Credentialing_Stage__pc'
