@@ -24,9 +24,8 @@ dependencies = [
 [project.scripts]
 make-snapshot = "snapshot_service.writer:main"
 
-# ---- UV source override for your local org_utils only
 [tool.uv.sources]
-org-utils = { path = "../org_utils", editable = true }
+org-utils    = { path = "../org_utils", editable = true }
 
 # ---- Tell hatch/packaging that code lives under src/
 [tool.hatch.build.targets.wheel]

@@ -7,13 +7,16 @@ from datetime import date, datetime, timezone
 from dotenv import load_dotenv
 
 from .airtable import load_airtable_snapshot
+from .wingspan import fetch_payee_data
 from .salesforce import load_salesforce_df
 from .storage import snapshot_uri, write_parquet_atomic, write_text
+from .config import cfg
 
 load_dotenv()  # will look for a .env file in your project root
 
 
-BASE_URI = "file://./data/snapshots"
+# Use the same base URI configuration as readers (SNAPSHOT_BASE_URI or default)
+BASE_URI = cfg.base_uri
 
 
 def load_enrollments_df():
@@ -35,15 +38,17 @@ def load_cred_hx_df():
 database_dicts = {
     "enrollments": load_enrollments_df,
     "licenses": load_license_df,
-    "airtable": load_airtable_snapshot,
     "accounts": load_accounts_df,
     "credentialing_history": load_cred_hx_df,
+    "wingspan_payees": fetch_payee_data,
+    "airtable": load_airtable_snapshot,
 }
 
 
 # Loop through each database and run the snapshot for today
 def main():
     DATE_TODAY = date.today()
+    print(f"[writer] Using BASE_URI={BASE_URI}")
     # get each dataset
     for dataset, load_df in database_dicts.items():
         print(f"===== {dataset} =====")
@@ -57,6 +62,8 @@ def main():
             print(f"successfully pulled {len(df)} rows from {dataset}")
 
             destination = snapshot_uri(BASE_URI, dataset, DATE_TODAY)
+
+            print(f"[writer] Writing snapshot for '{dataset}' to {destination}")
 
             # Write parquet atomically
             write_parquet_atomic(df, destination)

@@ -1,11 +1,22 @@
 SELECT
     Id,
     NPI__pc,
+    FirstName,
+    LastName,
     Primary_Practice_State__pc,
     Account_Status__pc,
     Credentialing_Stage__pc,
+    Primary_License__pc, 
     CVO_Credentialing_Listener_Status__pc,
-    EPD_Provider_Facts_Record__pr.Payer_Exclusions__c
-FROM Account
+    Active_CVO_Provider_Data__pr.CVO_First_Name__c, 
+    Active_CVO_Provider_Data__pr.CVO_Last_Name__c, 
+    Active_CVO_Provider_Data__pr.Credentialing_Status_Update_Date__c, 
+    Active_CVO_Provider_Data__pr.Last_Outreach_Reason__c,
+    Active_CVO_Provider_Data__pr.CVO_CAQH_ID__c,
+    Active_CVO_Provider_Data__pr.Attestation_Date__c,
+    EPD_Provider_Facts_Record__pr.Payer_Exclusions__c,
+    EPD_Provider_Facts_Record__pr.Contract_Signed__c
+FROM
+    Account
 WHERE
     NPI__pc != NULL
