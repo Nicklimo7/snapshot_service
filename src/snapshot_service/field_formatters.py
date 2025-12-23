@@ -50,6 +50,8 @@ RENAME_MAPS = {
         "Account_Status__pc": "account_status",
         "Credentialing_Stage__pc": "account_cred_stage",
         "Primary_License__pc": "account_primary_license",
+        "Last_Credentialing_Approval_Date__pc": "account_last_cred_approval_date",
+        "Last_Credentialing_Initial_Approval_Date__pc": "account_last_cred_initial_approval_date",
         # --- CVO Fields ---
         "CVO_Credentialing_Listener_Status__pc": "account_cvo_listener_status",
         "Active_CVO_Provider_Data__pr.CVO_First_Name__c": "cvo_first_name",

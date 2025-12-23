@@ -8,6 +8,8 @@ SELECT
     Credentialing_Stage__pc,
     Primary_License__pc, 
     CVO_Credentialing_Listener_Status__pc,
+    Last_Credentialing_Approval_Date__pc, 
+    Last_Credentialing_Initial_Approval_Date__pc, 
     Active_CVO_Provider_Data__pr.CVO_First_Name__c, 
     Active_CVO_Provider_Data__pr.CVO_Last_Name__c, 
     Active_CVO_Provider_Data__pr.Credentialing_Status_Update_Date__c, 

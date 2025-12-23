@@ -1,9 +1,13 @@
 from snapshot_service.reader import latest_snapshot
 from snapshot_service.field_formatters import format_fields
-from org_utils.npi_utils import clean_npi_column
+from org_utils.npi_utils import clean_npi_column, is_valid_npi
 import datetime
 import numpy as np
 import pandas as pd
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def generate_initial_cred_df():
@@ -39,26 +43,39 @@ def generate_initial_cred_df():
     # Clean the NPI column
     df["npi"] = clean_npi_column(df, "account_npi")
 
+    # Filter out rows with invalid NPIs
+    df["is_valid_npi"] = df["npi"].apply(is_valid_npi)
+    mask_valid_npi = df["is_valid_npi"]
+    df = df[mask_valid_npi].copy()
+
     today = datetime.date.today()
 
     # Ensure CreatedDate and cred status date is a datetime
     df["CreatedDate"] = pd.to_datetime(df["CreatedDate"], errors="coerce")
-    df["account_cred_status_update_date"] = pd.to_datetime(
-        df["account_cred_status_update_date"], errors="coerce"
+    df["cvo_cred_status_update_date"] = pd.to_datetime(
+        df["cvo_cred_status_update_date"], errors="coerce"
     )
 
     # Convert to date (still may contain NaT)
     df["CreatedDate_date"] = df["CreatedDate"].dt.date
-    df["account_cred_status_update_date_date"] = df[
-        "account_cred_status_update_date"
-    ].dt.date
+    df["cvo_cred_status_update_date"] = df["cvo_cred_status_update_date"].dt.date
 
     # Now safely compute weekday differences
     df["business_days_since_initial_cred_start"] = df["CreatedDate_date"].apply(
         lambda d: np.busday_count(d, today) if pd.notnull(d) else np.nan
     )
     df["business_days_since_cred_status_update"] = df[
-        "account_cred_status_update_date_date"
+        "cvo_cred_status_update_date"
     ].apply(lambda d: np.busday_count(d, today) if pd.notnull(d) else np.nan)
 
     return df
+
+
+def main():
+    df = generate_initial_cred_df()
+    print(df.info())
+    df.to_csv("initial_cred_accounts.csv", index=False)
+
+
+if __name__ == "__main__":
+    main()
